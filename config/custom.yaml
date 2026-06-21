@@ -19,7 +19,11 @@ llm:
 
 source:
   arxiv:
-    category: ["cs.AI","cs.CV","cs.LG","cs.CL"]
+    # The candidate set is deliberately focused on theoretical CS. Zotero-based
+    # reranking then prioritizes topics such as algorithms, complexity, learning
+    # theory, mechanism design, and optimization within these categories.
+    category: ["cs.DS","cs.CC","cs.DM","cs.LO","cs.GT","cs.LG"]
+    include_cross_list: false
 
 executor:
   debug: ${oc.env:DEBUG,null}
