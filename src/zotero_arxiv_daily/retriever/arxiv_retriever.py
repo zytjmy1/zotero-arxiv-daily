@@ -115,6 +115,17 @@ class ArxivRetriever(BaseRetriever):
 
     def _retrieve_raw_papers(self) -> list[ArxivResult]:
         client = arxiv.Client(num_retries=10, delay_seconds=10)
+        if self.config.executor.debug:
+            query = " OR ".join(f"cat:{category}" for category in self.config.source.arxiv.category)
+            logger.info("Debug mode: retrieving the 10 most recently submitted arXiv papers for the configured categories")
+            search = arxiv.Search(
+                query=query,
+                max_results=10,
+                sort_by=arxiv.SortCriterion.SubmittedDate,
+                sort_order=arxiv.SortOrder.Descending,
+            )
+            return list(client.results(search))
+
         query = '+'.join(self.config.source.arxiv.category)
         include_cross_list = self.config.source.arxiv.get("include_cross_list", False)
         # Get the latest paper from arxiv rss feed
