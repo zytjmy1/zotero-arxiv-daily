@@ -2,7 +2,9 @@ name: Send emails daily
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 22 * * *'
+    # Run after arXiv's weekday announcement window (20:00 US Eastern Time).
+    # 02:30 UTC is safely after the announcement in both daylight and standard time.
+    - cron: '30 2 * * 1-5'
 
 jobs:
   calculate-and-send:
