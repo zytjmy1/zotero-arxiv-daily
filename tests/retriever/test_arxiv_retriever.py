@@ -63,6 +63,30 @@ def test_arxiv_retriever(config, mock_feedparser, monkeypatch):
     assert set(p.title for p in papers) == set(e.title for e in new_entries)
 
 
+def test_debug_retriever_fetches_latest_category_papers(config, monkeypatch):
+    config.executor.debug = True
+    latest_result = SimpleNamespace(title="Latest paper")
+
+    class FakeClient:
+        search = None
+
+        def __init__(self, **kw):
+            pass
+
+        def results(self, search):
+            FakeClient.search = search
+            return iter([latest_result])
+
+    monkeypatch.setattr(arxiv_retriever.arxiv, "Client", FakeClient)
+    monkeypatch.setattr(arxiv_retriever.feedparser, "parse", lambda _: (_ for _ in ()).throw(AssertionError()))
+
+    papers = ArxivRetriever(config)._retrieve_raw_papers()
+
+    assert papers == [latest_result]
+    assert FakeClient.search.query == "cat:cs.AI OR cat:cs.CV"
+    assert FakeClient.search.max_results == 10
+
+
 def test_run_with_hard_timeout_returns_value():
     result = _run_with_hard_timeout(
         _sleep_and_return, ("done", 0.01), timeout=1, operation="test op", paper_title="paper"
